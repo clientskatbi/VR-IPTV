@@ -1,0 +1,25 @@
+# Godot
+.import/
+addons/*/.import/
+addons/*/plugin.cfg.*
+addons/*/*.translation
+
+# Generated
+export/
+build/
+*.apk
+*.aab
+
+# Editor
+.godot/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local
+*.keystore
+secrets.properties
+local.properties

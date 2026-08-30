@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3 uid="uid://bvr_iptv_main"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://bvr_iptv_login" path="res://scenes/login.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://bvr_iptv_cinema" path="res://scenes/cinema.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bvr_iptv_browser" path="res://scenes/channel_browser.tscn" id="4"]
+[ext_resource type="Environment" id="5"]
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 1
+background_color = Color(0.05, 0.05, 0.1, 1)
+ambient_light_color = Color(0.2, 0.3, 0.5, 1)
+ambient_light_energy = 0.5
+
+[node name="Main" type="Node"]
+script = ExtResource("1")
+
+[node name="XR" type="Node3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="XR"]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XR/XROrigin3D"]
+
+[node name="LeftController" type="XRController3D" parent="XR/XROrigin3D"]
+tracker = &"left_hand"
+
+[node name="RightController" type="XRController3D" parent="XR/XROrigin3D"]
+tracker = &"right_hand"
+
+[node name="LoginUI" parent="." instance=ExtResource("2")]
+
+[node name="CinemaScene" parent="." instance=ExtResource("3")]
+visible = false
+
+[node name="ChannelBrowser" parent="." instance=ExtResource("4")]
+visible = false

@@ -1,0 +1,40 @@
+; Engine configuration file.
+; VR IPTV Player for Meta Quest 2 — Xtream Codes + M3U + VR cinema.
+
+config_version=5
+
+[application]
+
+config/name="VR IPTV"
+config/description="VR-native IPTV player for Meta Quest 2. Supports Xtream Codes, M3U playlists, and Stalker portals with an immersive cinema environment."
+config/version="0.1.0"
+config/credits="Belal Katbi (clientskatbi)"
+run/main_scene="res://scenes/main.tscn"
+config/icon="res://icon.svg"
+
+[autoload]
+
+XtreamClient="*res://scripts/xtream_client.gd"
+SettingsManager="*res://scripts/settings_manager.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="viewport_aspect"
+window/stretch/aspect="keep"
+
+[input_devices]
+
+openxr/enabled=true
+openxr/default_action_map="res://addons/godotopenxrvendors/actions/actions.tres"
+openxr/form_factor=0
+openxr/view_configuration=1
+openxr/reference_space=1
+openxr/disabled_submission=false
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+textures/vram_compression/import_etc2_astc=true

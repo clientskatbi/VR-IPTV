@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvr_iptv_browser"]
+
+[ext_resource type="Script" path="res://scripts/channel_browser.gd" id="1"]
+
+[node name="ChannelBrowser" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.1, 0.9)
+
+[node name="Header" type="Label" parent="."]
+offset_left = 100.0
+offset_top = 60.0
+offset_right = 1820.0
+offset_bottom = 120.0
+text = "Live TV"
+theme_override_font_sizes/font_size = 42
+
+[node name="CategoryTabs" type="TabBar" parent="."]
+offset_left = 100.0
+offset_top = 140.0
+offset_right = 1820.0
+offset_bottom = 200.0
+tab_count = 3
+current_tab = 0
+tab_0/title = "Live TV"
+tab_1/title = "Movies"
+tab_2/title = "Series"
+
+[node name="SearchBar" type="LineEdit" parent="."]
+offset_left = 100.0
+offset_top = 220.0
+offset_right = 1820.0
+offset_bottom = 280.0
+placeholder_text = "Search channels..."
+theme_override_font_sizes/font_size = 24
+
+[node name="ChannelList" type="ItemList" parent="."]
+offset_left = 100.0
+offset_top = 300.0
+offset_right = 1820.0
+offset_bottom = 1000.0
+theme_override_font_sizes/font_size = 24
