@@ -30,6 +30,8 @@ Bring your own Xtream Codes, M3U playlist, or Stalker portal — watch live TV, 
 
 ## Quick start (sideload to Quest 2)
 
+Download the latest APK from [GitHub Actions artifacts](https://github.com/clientskatbi/VR-IPTV/actions), or build locally:
+
 ```bash
 # 1. Enable developer mode on your Quest (Meta Horizon app → headset → Developer Mode)
 # 2. Connect Quest via USB-C
@@ -39,6 +41,8 @@ godot --headless --path . --export-debug "Android" build/VR-IPTV-debug.apk
 # 4. Install
 adb install -r build/VR-IPTV-debug.apk
 ```
+
+**Latest CI build:** 55M debug APK built automatically on every push. See Actions artifacts.
 
 ## Tests
 
