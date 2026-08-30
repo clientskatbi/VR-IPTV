@@ -27,7 +27,7 @@ func save_credentials(server: String, username: String, password: String) -> voi
 
 func load_credentials() -> Dictionary:
 	load_settings()
-	var pwd := settings.get_value("xtream", "password", "")
+	var pwd: Variant = settings.get_value("xtream", "password", "")
 	if typeof(pwd) == TYPE_STRING and not pwd.is_empty():
 		pwd = _deobfuscate(pwd)
 	return {
@@ -64,7 +64,7 @@ func _deobfuscate(hex: String) -> String:
 		return ""
 	var bytes := PackedByteArray()
 	for i in range(0, hex.length(), 2):
-		bytes.append(int("0x" + hex.substr(i, 2)))
+		bytes.append(hex.substr(i, 2).hex_to_int())
 	var key := "vr-iptv-2026"
 	var key_bytes := key.to_utf8_buffer()
 	var out := PackedByteArray()

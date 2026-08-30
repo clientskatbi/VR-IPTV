@@ -40,6 +40,21 @@ godot --headless --path . --export-debug "Android" build/VR-IPTV-debug.apk
 adb install -r build/VR-IPTV-debug.apk
 ```
 
+## Tests
+
+```bash
+godot --headless --quit-after 30 --path . res://tests/test_runner.tscn
+```
+
+Covers:
+- `M3uParser` — empty input, multi-channel M3U, EXTINF/EXTGRP groups, tvg-id/logo, whitespace, missing duration, Arabic names
+- `SettingsManager` — roundtrip credentials, disk obfuscation verified (password NOT stored plaintext), Arabic usernames, URL-unsafe characters, UI preferences
+- `XtreamClient` — live/VOD/series URL builders, is_logged_in state, auth JSON contract (success/bad-creds/empty)
+
+Current: **36/36 passing**.
+
+Tests run automatically in CI before APK build (`.github/workflows/build.yml`).
+
 ## Project layout
 
 ```

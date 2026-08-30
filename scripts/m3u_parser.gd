@@ -16,9 +16,11 @@ class Channel:
 	var duration: int = -1
 
 var _channels: Array[Channel] = []
+var _pending_group: String = ""
 
 func parse_text(text: String) -> Array[Channel]:
 	_channels.clear()
+	_pending_group = ""
 	var lines := text.split("\n")
 	var current := Channel.new()
 
@@ -31,6 +33,8 @@ func parse_text(text: String) -> Array[Channel]:
 			continue
 		elif line.begins_with("#EXTINF"):
 			current = Channel.new()
+			current.group = _pending_group
+			_pending_group = ""
 			# Format: #EXTINF:duration,channel name
 			var comma_idx := line.find(",")
 			if comma_idx != -1:
@@ -39,7 +43,7 @@ func parse_text(text: String) -> Array[Channel]:
 				current.duration = _parse_duration(metadata)
 				_parse_extinf_attributes(metadata, current)
 		elif line.begins_with("#EXTGRP"):
-			current.group = line.substr(8).strip_edges()
+			_pending_group = line.substr(8).strip_edges()
 		elif line.begins_with("http://") or line.begins_with("https://"):
 			current.url = line
 			_channels.append(current)
@@ -66,14 +70,19 @@ func get_channels() -> Array[Channel]:
 	return _channels
 
 func _parse_duration(metadata: String) -> int:
-	# metadata looks like: #EXTINF:-1 tvg-id="..." group-title="...",-1
-	var parts := metadata.split(" ")
+	# metadata looks like: #EXTINF:-1 tvg-id="..." group-title="..."...
+	# The duration is the numeric portion immediately after #EXTINF:
+	var hash_idx := metadata.find("#EXTINF")
+	if hash_idx == -1:
+		return -1
+	var after_prefix := metadata.substr(hash_idx + 7)  # len("#EXTINF") = 7
+	var parts := after_prefix.split(" ")
 	for p in parts:
-		if p.begins_with("tvg-id=") or p.begins_with("group-title=") or p.begins_with("tvg-logo="):
-			continue
 		var colon := p.find(":")
 		if colon != -1:
-			return int(p.substr(colon + 1))
+			var num_str := p.substr(colon + 1)
+			if num_str.is_valid_int():
+				return num_str.to_int()
 	return -1
 
 func _parse_extinf_attributes(metadata: String, ch: Channel) -> void:
