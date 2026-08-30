@@ -112,13 +112,27 @@ jobs:
           ./godot/godot --headless --quit-after 30 --path . --script res://tests/lint_runner.gd 2>&1 | tee lint.log || echo "Lint completed with issues"
 
       - name: Build Android Debug APK
+        id: build
         env:
           ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           mkdir -p build
+          echo "=== Starting Android export ==="
           ./godot/godot --headless --path . --export-debug "Android" build/VR-IPTV-debug.apk 2>&1 | tee build.log
-          ls -la build/
+          EXPORT_RC=${PIPESTATUS[0]}
+          echo "=== Export exit code: ${EXPORT_RC} ==="
+          echo "=== build.log tail ==="
+          tail -40 build.log
+          echo "=== build dir listing ==="
+          ls -laR build/
+          if [[ ! -f "build/VR-IPTV-debug.apk" ]]; then
+            echo "ERROR: APK file was not produced (export exit=${EXPORT_RC})"
+            exit 1
+          fi
+          APK_SIZE=$(du -h build/VR-IPTV-debug.apk | cut -f1)
+          echo "apk_size=${APK_SIZE}" >> "$GITHUB_OUTPUT"
+          echo "=== APK built successfully: ${APK_SIZE} ==="
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
