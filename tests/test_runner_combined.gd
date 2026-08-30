@@ -41,8 +41,25 @@ func _ready() -> void:
 	if integ_exit[0] != 0:
 		exit_code = integ_exit[0]
 
+	# Property/fuzz tests
+	var prop_passed := [0]
+	var prop_failed := [0]
+	var prop_exit := [0]
+	var prop = load("res://tests/test_property.gd").new()
+	prop.tree_exited.connect(func():
+		if is_instance_valid(prop):
+			prop_passed[0] = prop.passed
+			prop_failed[0] = prop.failed
+			prop_exit[0] = prop.exit_code)
+	add_child(prop)
+	await _wait_for_node(prop)
+	passed += prop_passed[0]
+	failed += prop_failed[0]
+	if prop_exit[0] != 0:
+		exit_code = prop_exit[0]
+
 	print("\n═══════════════════════════════")
-	print("TOTAL (core+extended+integration): %d passed, %d failed" % [passed, failed])
+	print("TOTAL (core+extended+integration+property): %d passed, %d failed" % [passed, failed])
 	print("═══════════════════════════════")
 	get_tree().quit(exit_code)
 

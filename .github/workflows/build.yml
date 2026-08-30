@@ -88,7 +88,7 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: Run unit + integration tests
+      - name: Run unit + integration + property tests
         run: |
           ./godot/godot --headless --quit-after 240 --path . res://tests/test_runner_combined.tscn 2>&1 | tee test.log
           tail -5 test.log
@@ -97,6 +97,19 @@ jobs:
             exit 1
           fi
           echo "✅ All tests passed"
+
+      - name: Run property/fuzz tests
+        run: |
+          ./godot/godot --headless --quit-after 120 --path . res://tests/test_property.tscn 2>&1 | tee fuzz.log
+          if grep -qE "[1-9][0-9]* failed" fuzz.log; then
+            echo "❌ Fuzz tests failed"
+            exit 1
+          fi
+          echo "✅ Fuzz tests passed"
+
+      - name: Lint check (style + TODO markers)
+        run: |
+          ./godot/godot --headless --quit-after 30 --path . --script res://tests/lint_runner.gd 2>&1 | tee lint.log || echo "Lint completed with issues"
 
       - name: Build Android Debug APK
         env:
