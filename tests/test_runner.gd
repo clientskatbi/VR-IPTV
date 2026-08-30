@@ -21,12 +21,14 @@ func _ready() -> void:
 	failed += ext_runner.failed
 	if ext_runner.exit_code != 0:
 		exit_code = ext_runner.exit_code
-	# Print combined summary
+	ext_runner.queue_free()
+	# Print combined summary (core + extended)
 	print("\n═══════════════════════════════")
-	print("TOTAL: %d passed, %d failed" % [passed, failed])
+	print("Core+Extended: %d passed, %d failed" % [passed, failed])
+	print("(Integration tests run separately via test_integration.tscn)")
 	print("═══════════════════════════════")
-	# Defer quit so all prints flush
-	call_deferred("_quit")
+	# Signal completion to host (test_runner_combined.gd)
+	queue_free()
 
 func _quit() -> void:
 	get_tree().quit(exit_code)

@@ -58,9 +58,14 @@ Covers:
 - Scene smoke tests — all .tscn files load + instantiate
 - Performance benchmarks — 50K channels <5s, 1K credential roundtrips <3s, 10K URL builds <200ms
 
-Current: **86/86 passing** (36 core + 50 extended).
+Current: **105/105 passing** (36 core + 50 extended + 19 integration).
 
 Tests run automatically in CI before APK build (`.github/workflows/build.yml`).
+
+Run all tests with one command:
+```bash
+godot --headless --quit-after 240 --path . res://tests/test_runner_combined.tscn
+```
 
 ## Project layout
 

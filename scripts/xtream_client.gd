@@ -100,21 +100,31 @@ func _fetch_action(action: String, params: Dictionary = {}) -> Array:
 
 	var http := HTTPRequest.new()
 	add_child(http)
-	var done := [false]
-	var result_data: Array = []
-	http.request_completed.connect(func(_r, _c, _h, body, h):
-		h.queue_free()
+	# Use Array/Dictionary containers since GDScript closures capture by value for primitives
+	var state := {"done": false, "data": []}
+	# Capture http in lambda scope; signal passes 4 args (result, code, headers, body)
+	http.request_completed.connect(func(_r, _c, _h, body):
+		http.queue_free()
 		if body.size() > 0:
 			var parsed: Variant = JSON.parse_string(body.get_string_from_utf8())
 			if parsed is Array:
-				result_data = parsed
-		done[0] = true)
-	http.request(url, ["User-Agent: " + USER_AGENT])
+				state["data"] = parsed
+		state["done"] = true)
+	var req_err := http.request(url, ["User-Agent: " + USER_AGENT])
+	if req_err != OK:
+		push_error("XtreamClient: request failed: %d" % req_err)
+		http.queue_free()
+		return []
 
-	# Block until response (Godot 4.4+ supports await on signal)
-	while not done[0]:
-		await get_tree().process_frame
-	return result_data
+	# Block until response
+	var deadline := Time.get_ticks_msec() + 10000
+	while not state["done"]:
+		if Time.get_ticks_msec() > deadline:
+			push_error("XtreamClient: timeout waiting for %s" % action)
+			break
+		# Use main_loop's process_frame which is always available
+		await Engine.get_main_loop().process_frame
+	return state["data"]
 
 func _urllib_encode(s: String) -> String:
 	return s.replace("%", "%25").replace(" ", "%20").replace("&", "%26").replace("?", "%3F").replace("=", "%3D")

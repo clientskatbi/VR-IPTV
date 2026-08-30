@@ -88,10 +88,10 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: Run unit tests
+      - name: Run unit + integration tests
         run: |
-          ./godot/godot --headless --quit-after 30 --path . res://tests/test_runner.tscn 2>&1 | tee test.log
-          grep -E "Tests: .* failed" test.log
+          ./godot/godot --headless --quit-after 240 --path . res://tests/test_runner_combined.tscn 2>&1 | tee test.log
+          tail -5 test.log
           if grep -qE "[1-9][0-9]* failed" test.log; then
             echo "❌ Tests failed"
             exit 1
