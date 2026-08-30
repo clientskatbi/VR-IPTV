@@ -50,8 +50,15 @@ Covers:
 - `M3uParser` — empty input, multi-channel M3U, EXTINF/EXTGRP groups, tvg-id/logo, whitespace, missing duration, Arabic names
 - `SettingsManager` — roundtrip credentials, disk obfuscation verified (password NOT stored plaintext), Arabic usernames, URL-unsafe characters, UI preferences
 - `XtreamClient` — live/VOD/series URL builders, is_logged_in state, auth JSON contract (success/bad-creds/empty)
+- `M3uParser` edge cases — BOM stripping, EXTVLCOPT ignored, EXTGRP-to-next-EXTINF pairing, orphan URLs, consecutive EXTINF, commas in names, IPv4/HTTPS URLs, durations -1/0, 10K-channel stress
+- `LoginUI` validation — empty fields rejected, whitespace-only treated as empty, M3U fallback
+- `ChannelBrowser` logic — search filter (case-insensitive + Arabic), tab routing
+- `Main flow` — scene composition, signal contracts (login_succeeded/login_failed)
+- `VideoPlayer` — stream construction, playback signals
+- Scene smoke tests — all .tscn files load + instantiate
+- Performance benchmarks — 50K channels <5s, 1K credential roundtrips <3s, 10K URL builds <200ms
 
-Current: **36/36 passing**.
+Current: **86/86 passing** (36 core + 50 extended).
 
 Tests run automatically in CI before APK build (`.github/workflows/build.yml`).
 
