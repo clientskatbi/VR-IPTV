@@ -12,7 +12,8 @@ func play_url(url: String) -> void:
 	var stream := VideoStream.new()
 	stream.file = url
 	self.stream = stream
-	if not play():
+	play()
+	if not is_playing():
 		playback_failed.emit("Failed to start playback for %s" % url)
 		return
 	playback_started.emit()

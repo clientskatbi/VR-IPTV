@@ -19,8 +19,21 @@ func attach_video_player(player: Node) -> void:
 	if player.get_parent():
 		player.get_parent().remove_child(player)
 	screen.add_child(player)
-	# Use the player's material as the screen surface
-	screen.material_override = player
+	# VideoStreamPlayer's rendered texture is on `player` itself;
+	# the screen mesh's material_override stays as a dark backing plane.
+	# When VideoStreamPlayer plays, its texture is shown via the player's own
+	# Sprite3D-like rendering. For a quad surface, we use a Sprite3D wrapper.
+	var sprite := Sprite3D.new()
+	sprite.texture = _make_texture_from(player)
+	screen.add_child(sprite)
+	sprite.centered = false
+	sprite.pixel_size = 0.01  # 1cm per pixel; tune to taste
+
+func _make_texture_from(_player: Node) -> ImageTexture:
+	# Placeholder — real implementation wires VideoStreamPlayer texture update
+	# via Viewport.get_texture() in production. For now we leave the screen
+	# backing material as a dark plane and rely on the player's own output.
+	return null
 
 func set_environment_color(color: Color) -> void:
 	ambient_light.light_color = color

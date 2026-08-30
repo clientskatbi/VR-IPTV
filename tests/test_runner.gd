@@ -12,7 +12,19 @@ func _ready() -> void:
 	_run_settings_manager()
 	_run_xtream_url_builder()
 	_run_xtream_auth_response_parsing()
-	_print_summary()
+	# Run extended tests in-process (same Node tree)
+	var ext_runner: Node = load("res://tests/test_runner_extended.gd").new()
+	add_child(ext_runner)
+	ext_runner.call("run_all")
+	# Merge extended results into our counters
+	passed += ext_runner.passed
+	failed += ext_runner.failed
+	if ext_runner.exit_code != 0:
+		exit_code = ext_runner.exit_code
+	# Print combined summary
+	print("\n═══════════════════════════════")
+	print("TOTAL: %d passed, %d failed" % [passed, failed])
+	print("═══════════════════════════════")
 	# Defer quit so all prints flush
 	call_deferred("_quit")
 
