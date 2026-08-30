@@ -4,6 +4,10 @@ addons/*/.import/
 addons/*/plugin.cfg.*
 addons/*/*.translation
 
+# Large vendor binaries (Meta OpenXR native libs + Android export templates)
+addons/godotopenxrvendors/.bin/
+Library/Application Support/Godot/export_templates/
+
 # Generated
 export/
 build/
