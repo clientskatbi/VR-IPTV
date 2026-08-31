@@ -45,6 +45,11 @@ func _on_login_pressed() -> void:
 	if server.is_empty() or username.is_empty() or password.is_empty():
 		status_label.text = "All fields required"
 		return
+	attempt_login(server, username, password)
+
+func attempt_login(server: String, username: String, password: String) -> void:
+	## Public entry point — used by main.gd for auto-login and by the button.
+	## Updates the StatusLabel and starts the elapsed-time Timer.
 	_login_in_progress = true
 	_elapsed_seconds = 0
 	login_button.disabled = true

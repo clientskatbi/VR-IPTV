@@ -9,17 +9,17 @@ func _ready() -> void:
 	# Auto-login if credentials are saved
 	var creds := SettingsManager.load_credentials()
 	if not creds.username.is_empty():
-		_attempt_login(creds.server, creds.username, creds.password)
+		# Route through login_ui so the StatusLabel and Timer are updated
+		login_ui.attempt_login(creds.server, creds.username, creds.password)
 	else:
 		login_ui.show()
 		browser.hide()
 		cinema.hide()
 
+	# Note: signal wiring lives in login_ui._ready() — main scene also
+	# listens so the channel browser and cinema scenes can be shown.
 	XtreamClient.login_succeeded.connect(_on_login_ok)
 	XtreamClient.login_failed.connect(_on_login_fail)
-
-func _attempt_login(server: String, username: String, password: String) -> void:
-	XtreamClient.login(server, username, password)
 
 func _on_login_ok(user_info: Dictionary) -> void:
 	login_ui.hide()
@@ -29,8 +29,9 @@ func _on_login_ok(user_info: Dictionary) -> void:
 
 func _on_login_fail(reason: String) -> void:
 	push_warning("Login failed: %s" % reason)
-	if login_ui.has_node("StatusLabel"):
-		login_ui.get_node("StatusLabel").text = "Login failed: %s" % reason
+	# login_ui listens to the same signal and already updates the StatusLabel
+	# Just make sure the UI is visible so the user sees the error
+	login_ui.show()
 
 func _load_live_categories() -> void:
 	# Triggered via the browser; keep logic minimal here.
