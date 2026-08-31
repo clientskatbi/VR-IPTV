@@ -142,6 +142,44 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Telegram notification on success
+        if: success() && github.event_name != 'pull_request'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+          TESTS_PASSED: ${{ steps.tests.outputs.tests_passed }}
+          APK_SIZE: ${{ steps.build.outputs.apk_size }}
+        run: |
+          if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
+            echo "TELEGRAM_BOT_TOKEN not set — skipping Telegram notification"
+            exit 0
+          fi
+          COMMIT_MSG=$(git log -1 --pretty=%s HEAD)
+          BRANCH=${GITHUB_REF_NAME}
+          VERSION=$(grep '^config/version=' project.godot | sed 's/config\/version="//;s/"$//' || echo "unknown")
+          BODY=$(printf 'Build succeeded\nAPK size: %s\nTests passed: %s\nBranch: %s\nCommit: %s\nRun: %s' \
+            "${APK_SIZE}" "${TESTS_PASSED}" "${BRANCH}" "${COMMIT_MSG}" "${GITHUB_RUN_ID}")
+          ./scripts/notify-telegram.sh "VR-IPTV v${VERSION}" "${BODY}" "silent" || echo "Telegram notify failed (non-blocking)"
+
+      - name: Telegram notification on failure
+        if: failure() && github.event_name != 'pull_request'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_OWNER_ID: ${{ secrets.TELEGRAM_OWNER_ID }}
+        run: |
+          if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
+            echo "TELEGRAM_BOT_TOKEN not set — skipping failure notification"
+            exit 0
+          fi
+          BRANCH=${GITHUB_REF_NAME}
+          FAILED_STEP="unknown"
+          if [[ "${{ steps.tests.conclusion }}" == "failure" ]]; then FAILED_STEP="tests"; fi
+          if [[ "${{ steps.build.conclusion }}" == "failure" ]]; then FAILED_STEP="build"; fi
+          BODY=$(printf 'Build FAILED\nBranch: %s\nFailed step: %s\nRun: %s\nLogs: %s' \
+            "${BRANCH}" "${FAILED_STEP}" "${GITHUB_RUN_ID}" \
+            "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")
+          ./scripts/notify-telegram.sh "VR-IPTV build failed" "${BODY}" || echo "Telegram notify failed (non-blocking)"
+
   release:
     needs: build
     runs-on: ubuntu-latest
