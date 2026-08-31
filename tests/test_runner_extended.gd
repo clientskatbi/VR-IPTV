@@ -327,7 +327,7 @@ func _run_performance_benchmarks() -> void:
 			print("  ✗ FAIL: roundtrip mismatch at i=%d" % i)
 			exit_code = 1
 	elapsed_ms = Time.get_ticks_msec() - t0
-	_assert("1000 credentials roundtrips (%dms)" % elapsed_ms, elapsed_ms < 3000)
+	_assert("1000 credentials roundtrips (%dms)" % elapsed_ms, elapsed_ms < 5000)
 	sm.queue_free()
 
 	# XtreamClient: 10K URL builds

@@ -60,7 +60,7 @@ Covers:
 - `Main flow` — scene composition, signal contracts (login_succeeded/login_failed)
 - `VideoPlayer` — stream construction, playback signals
 - Scene smoke tests — all .tscn files load + instantiate
-- Performance benchmarks — 50K channels <5s, 1K credential roundtrips <3s, 10K URL builds <200ms
+- Performance benchmarks — 50K channels <5s, 1K credential roundtrips <5s, 10K URL builds <200ms
 
 Current: **123/123 passing** (36 core + 50 extended + 19 integration + 18 property).
 
