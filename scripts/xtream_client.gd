@@ -117,7 +117,7 @@ func _fetch_action(action: String, params: Dictionary = {}) -> Array:
 		return []
 
 	# Block until response
-	var deadline := Time.get_ticks_msec() + 10000
+	var deadline := Time.get_ticks_msec() + 30000
 	while not state["done"]:
 		if Time.get_ticks_msec() > deadline:
 			push_error("XtreamClient: timeout waiting for %s" % action)
