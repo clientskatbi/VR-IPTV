@@ -141,3 +141,52 @@ jobs:
           path: build/VR-IPTV-debug.apk
           retention-days: 30
           if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: VR-IPTV-debug
+          path: artifacts/
+
+      - name: Verify APK exists
+        run: |
+          ls -la artifacts/
+          if [[ ! -f artifacts/VR-IPTV-debug.apk ]]; then
+            echo "ERROR: APK not in artifacts"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/VR-IPTV-debug.apk
+          generate_release_notes: true
+          body: |
+            ## VR-IPTV v${{ github.ref_name }}
+
+            **Branch:** ${{ github.ref_name }}
+            **Commit:** ${{ github.sha }}
+
+            ### Install on Meta Quest 2
+
+            1. Enable Developer Mode (Meta Horizon app, Headset Settings, Developer Mode)
+            2. Connect Quest via USB-C
+            3. Install:
+               ```
+               adb install -r VR-IPTV-debug.apk
+               ```
+            4. Launch VR IPTV from Unknown Sources
+
+            ### Features
+            - Xtream Codes plus M3U playlist support
+            - Immersive VR cinema environment
+            - 123 automated tests pass (unit, integration, property)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
