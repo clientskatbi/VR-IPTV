@@ -19,8 +19,10 @@ var _username: String = ""
 var _password: String = ""
 var _logged_in_user_info: Dictionary = {}
 
+const LOGIN_TIMEOUT_SEC := 30.0
+
 func login(server_url: String, username: String, password: String) -> bool:
-	"""Authenticate against Xtream Codes portal. Returns true if successful."""
+	"""Authenticate against Xtream Codes portal. Returns true if request was started."""
 	_server_url = server_url.trim_suffix("/")
 	_username = username
 	_password = password
@@ -32,8 +34,14 @@ func login(server_url: String, username: String, password: String) -> bool:
 
 	var http := HTTPRequest.new()
 	add_child(http)
+	http.timeout = LOGIN_TIMEOUT_SEC
 	http.request_completed.connect(_on_login_response.bind(http))
-	http.request(url, ["User-Agent: " + USER_AGENT])
+	var err := http.request(url, ["User-Agent: " + USER_AGENT])
+	if err != OK:
+		push_error("XtreamClient: login request() failed: %d" % err)
+		http.queue_free()
+		login_failed.emit("Cannot start request (code=%d)" % err)
+		return false
 	return true
 
 func _on_login_response(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray, http: HTTPRequest) -> void:
