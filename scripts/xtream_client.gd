@@ -38,8 +38,8 @@ func login(server_url: String, username: String, password: String) -> bool:
 
 func _on_login_response(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray, http: HTTPRequest) -> void:
 	http.queue_free()
-	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
-		login_failed.emit("HTTP error: %d (result=%d)" % [response_code, result])
+	if result != HTTPRequest.RESULT_SUCCESS:
+		login_failed.emit(_describe_http_error(result, response_code))
 		return
 
 	var text := body.get_string_from_utf8()
@@ -55,6 +55,27 @@ func _on_login_response(result: int, response_code: int, _headers: PackedStringA
 
 	_logged_in_user_info = d.get("user_info", {})
 	login_succeeded.emit(_logged_in_user_info)
+
+func _describe_http_error(result: int, response_code: int) -> String:
+	## Translates HTTPRequest.Result + status code into a human-readable message.
+	var result_name := "Unknown"
+	match result:
+		HTTPRequest.RESULT_SUCCESS: result_name = "Success"
+		HTTPRequest.RESULT_CHUNKED_BODY_SIZE_MISMATCH: result_name = "Chunked body size mismatch"
+		HTTPRequest.RESULT_CANT_CONNECT: result_name = "Cannot connect to server (host down or port blocked)"
+		HTTPRequest.RESULT_CANT_RESOLVE: result_name = "Cannot resolve hostname (DNS failed or no internet)"
+		HTTPRequest.RESULT_CONNECTION_ERROR: result_name = "Connection error"
+		HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR: result_name = "TLS/SSL handshake error (certificate invalid)"
+		HTTPRequest.RESULT_NO_RESPONSE: result_name = "No response from server (timeout)"
+		HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED: result_name = "Response too large"
+		HTTPRequest.RESULT_BODY_DECOMPRESS_FAILED: result_name = "Cannot decompress response"
+		HTTPRequest.RESULT_REQUEST_FAILED: result_name = "Request failed"
+		HTTPRequest.RESULT_DOWNLOAD_FILE_CANT_OPEN: result_name = "Cannot open download file"
+		HTTPRequest.RESULT_REDIRECT_LIMIT_REACHED: result_name = "Too many redirects"
+		HTTPRequest.RESULT_TLS_CERTIFICATE_CANT_VERIFY: result_name = "TLS certificate cannot be verified"
+	if response_code == 0:
+		return "%s (network error, code=%d)" % [result_name, result]
+	return "%s (HTTP %d)" % [result_name, response_code]
 
 func get_live_categories() -> Array:
 	return await _fetch_action("get_live_categories")

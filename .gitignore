@@ -27,3 +27,14 @@ Thumbs.db
 *.keystore
 secrets.properties
 local.properties
+
+# Android source template (modified for INTERNET permission)
+# Track src/main/AndroidManifest.xml, ignore build artifacts
+android/build/
+android/.gradle/
+android/app/build/
+android/.idea/
+android/local.properties
+
+# Editor backup files
+*.bak
