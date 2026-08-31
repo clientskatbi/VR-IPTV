@@ -19,7 +19,7 @@ var _username: String = ""
 var _password: String = ""
 var _logged_in_user_info: Dictionary = {}
 
-const LOGIN_TIMEOUT_SEC := 30.0
+const LOGIN_TIMEOUT_SEC := 15.0
 
 func login(server_url: String, username: String, password: String) -> bool:
 	"""Authenticate against Xtream Codes portal. Returns true if request was started."""
@@ -32,17 +32,27 @@ func login(server_url: String, username: String, password: String) -> bool:
 		_urllib_encode(username), _urllib_encode(password),
 	]
 
+	# Defer to next frame so HTTPRequest is fully in the tree before request()
+	_initiate_request.call_deferred(url, "login")
+	return true
+
+func _initiate_request(url: String, kind: String) -> void:
+	## Internal: actually perform the HTTP request after the request node is in the tree.
 	var http := HTTPRequest.new()
 	add_child(http)
 	http.timeout = LOGIN_TIMEOUT_SEC
-	http.request_completed.connect(_on_login_response.bind(http))
+	http.use_threads = true
+	if kind == "login":
+		http.request_completed.connect(_on_login_response.bind(http))
+	else:
+		# _fetch_action manages its own callback via state dict
+		pass
 	var err := http.request(url, ["User-Agent: " + USER_AGENT])
 	if err != OK:
-		push_error("XtreamClient: login request() failed: %d" % err)
+		push_error("XtreamClient: request() failed: %d for %s" % [err, kind])
 		http.queue_free()
-		login_failed.emit("Cannot start request (code=%d)" % err)
-		return false
-	return true
+		if kind == "login":
+			login_failed.emit("Cannot start request (code=%d)" % err)
 
 func _on_login_response(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray, http: HTTPRequest) -> void:
 	http.queue_free()
@@ -53,12 +63,12 @@ func _on_login_response(result: int, response_code: int, _headers: PackedStringA
 	var text := body.get_string_from_utf8()
 	var data: Variant = JSON.parse_string(text)
 	if not data is Dictionary:
-		login_failed.emit("Invalid JSON response")
+		login_failed.emit("Invalid JSON response (body=%d bytes)" % body.size())
 		return
 
 	var d := data as Dictionary
 	if int(d.get("user_info", {}).get("auth", 0)) != 1:
-		login_failed.emit("Invalid credentials")
+		login_failed.emit("Invalid credentials (auth=0)")
 		return
 
 	_logged_in_user_info = d.get("user_info", {})

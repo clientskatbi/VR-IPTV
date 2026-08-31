@@ -38,3 +38,55 @@ android/local.properties
 
 # Editor backup files
 *.bak
+
+# Godot Android lib binaries (downloaded by CI)
+android/libs/
+android/libs/debug/
+android/libs/release/
+
+# Android instrumented test infrastructure (not needed for production build)
+android/src/instrumented/
+android/src/androidTestInstrumented/
+android/assetPackInstallTime/
+# Generated res files (Godot generates per-build)
+android/res/values-ar/
+android/res/values-bg/
+android/res/values-ca/
+android/res/values-cs/
+android/res/values-da/
+android/res/values-de/
+android/res/values-el/
+android/res/values-en/
+android/res/values-es/
+android/res/values-es-rES/
+android/res/values-fa/
+android/res/values-fi/
+android/res/values-fr/
+android/res/values-hi/
+android/res/values-hr/
+android/res/values-hu/
+android/res/values-in/
+android/res/values-it/
+android/res/values-iw/
+android/res/values-ja/
+android/res/values-ko/
+android/res/values-lt/
+android/res/values-lv/
+android/res/values-nb/
+android/res/values-nl/
+android/res/values-pl/
+android/res/values-pt/
+android/res/values-ro/
+android/res/values-ru/
+android/res/values-sk/
+android/res/values-sl/
+android/res/values-sr/
+android/res/values-sv/
+android/res/values-th/
+android/res/values-tl/
+android/res/values-tr/
+android/res/values-uk/
+android/res/values-vi/
+android/res/values-zh/
+android/res/values-zh-rHK/
+android/res/values-zh-rTW/

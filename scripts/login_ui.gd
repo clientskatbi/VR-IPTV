@@ -9,6 +9,8 @@ extends Control
 @onready var status_label: Label = $StatusLabel
 
 var _login_in_progress := false
+var _elapsed_timer: Timer
+var _elapsed_seconds: int = 0
 
 func _ready() -> void:
 	login_button.pressed.connect(_on_login_pressed)
@@ -27,6 +29,13 @@ func _ready() -> void:
 	if not XtreamClient.login_failed.is_connected(_on_login_fail):
 		XtreamClient.login_failed.connect(_on_login_fail)
 
+	# Setup elapsed-time timer
+	_elapsed_timer = Timer.new()
+	_elapsed_timer.wait_time = 1.0
+	_elapsed_timer.one_shot = false
+	_elapsed_timer.timeout.connect(_on_tick)
+	add_child(_elapsed_timer)
+
 func _on_login_pressed() -> void:
 	if _login_in_progress:
 		return
@@ -37,14 +46,28 @@ func _on_login_pressed() -> void:
 		status_label.text = "All fields required"
 		return
 	_login_in_progress = true
+	_elapsed_seconds = 0
 	login_button.disabled = true
 	login_button.text = "Connecting..."
-	status_label.text = "Logging in (this may take up to 30s)..."
+	status_label.text = "Connecting... (0s)"
+	_elapsed_timer.start()
 	SettingsManager.save_credentials(server, username, password)
 	XtreamClient.login(server, username, password)
 
+func _on_tick() -> void:
+	if not _login_in_progress:
+		return
+	_elapsed_seconds += 1
+	if _elapsed_seconds >= 30:
+		# Hard timeout — force fail so the user isn't stuck forever
+		_on_login_fail("Timeout after 30s — server not responding")
+		_elapsed_timer.stop()
+		return
+	status_label.text = "Connecting... (%ds)" % _elapsed_seconds
+
 func _on_login_ok(_user_info: Dictionary) -> void:
 	_login_in_progress = false
+	_elapsed_timer.stop()
 	login_button.disabled = false
 	login_button.text = "Sign In"
 	status_label.text = "Login OK — loading channels..."
@@ -57,6 +80,7 @@ func _on_login_ok(_user_info: Dictionary) -> void:
 
 func _on_login_fail(reason: String) -> void:
 	_login_in_progress = false
+	_elapsed_timer.stop()
 	login_button.disabled = false
 	login_button.text = "Sign In"
 	status_label.text = "Login failed: %s" % reason
